@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   build-jvm-image:
-    if: ((github.event_name == 'workflow_dispatch') || (github.event_name == 'schedule') || ((github.event_name == 'workflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch')) && (github.event.workflow_run.conclusion == 'success'))) && ((github.repository == 'quarkusio/quarkus-super-heroes') && ((github.event.workflow_run.head_branch == 'main')))
+    if: ((github.event_name == 'workflow_dispatch') || (github.event_name == 'schedule') || ((github.event_name == 'workflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch')) && (github.event.workflow_run.conclusion == 'success'))) && ((github.repository == 'edeandrea/ci-test') && ((github.event.workflow_run.head_branch == 'main')))
     defaults:
       run:
         shell: bash
