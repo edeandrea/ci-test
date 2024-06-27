@@ -21,26 +21,19 @@ jobs:
       ref: ${{ steps.calculate_branch.outputs.ref}}
       branch: ${{ steps.calculate_branch.outputs.branch}}
     steps:
-      - name: Calculate Branch (workflow_run event)
+      - name: Calculate Branch
         id: calculate_branch
-        if: github.event_name == 'workflow_run'
         run: |
-          echo "ref=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_OUTPUT
-          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
-
-      - name: Calculate Branch (workflow_dispatch event)
-        id: calculate_branch
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      - name: Calculate Branch (schedule event)
-        id: calculate_branch
-        if: github.event_name == 'schedule'
-        run: |
-          echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          if [[ ${{ github.event_name }} == 'workflow_run' ]]; then
+            echo "ref=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.event_name}} == 'workflow_dispatch' ]]; then
+            echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.event_name }} == 'schedule' ]]; then
+            echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
 
   check-commit-count:
     needs: calculate-refs
