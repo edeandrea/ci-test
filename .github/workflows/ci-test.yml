@@ -75,4 +75,7 @@ jobs:
           echo "github.repository = ${{ github.repository }}"
           echo "REF = ${{ env.REF }}"
           echo "BRANCH = ${{ env.BRANCH }}"
+
+      - name: Print filesystem
+        run: tree .
           
