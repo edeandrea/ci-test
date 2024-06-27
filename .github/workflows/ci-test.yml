@@ -51,7 +51,7 @@ jobs:
       - name: Check whether workflow should run
         id: calculate_commits
         run: |
-          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '5 minutes ago' | wc -l) -gt 0 ]]; then
+          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '10 minutes ago' | wc -l) -gt 0 ]]; then
             echo "has_commits=true" >> $GITHUB_OUTPUT
           else
             echo "has_commits=true" >> $GITHUB_OUTPUT
@@ -74,13 +74,13 @@ jobs:
         run: |
           echo "github.event_name = ${{ github.event_name }}"
           echo "github.repository = ${{ github.repository }}"
-          echo "REF = ${{ env.REF }}"
-          echo "BRANCH = ${{ env.BRANCH }}"
+          echo "REF = ${{ needs.check-commit-count.outputs.ref }}"
+          echo "BRANCH = ${{ needs.check-commit-count.outputs.branch }}"
 
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.check-commit-count.outputs.ref }}
 
       - name: Print filesystem
-        run: tree .
+        run: tree -a .
           
