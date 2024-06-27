@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   build-jvm-image:
+    if: (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
     defaults:
       run:
         shell: bash
@@ -40,13 +41,10 @@ jobs:
           echo "REF=${{ github.sha }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
-      - name: Print github vars
+      - name: Print vars
         run: |
           echo "github.event_name = ${{ github.event_name }}"
           echo "github.repository = ${{ github.repository }}"
-
-      - name: Print branch vars
-        if: (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
-        run: |
           echo "REF = ${{ env.REF }}"
           echo "BRANCH = ${{ env.BRANCH }}"
+          
