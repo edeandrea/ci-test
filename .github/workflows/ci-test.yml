@@ -50,12 +50,8 @@ jobs:
         id: calculate_commits
         continue-on-error: true
         run: |
-          if [[ ${{ github.event_name }} == 'schedule']]; then
-            if [[ $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
-              echo "SHOULD_RUN=true" >> $GITHUB_OUTPUT
-            else
-              echo "SHOULD_RUN=false" >> $GITHUB_OUTPUT
-            fi
+          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
+            echo "SHOULD_RUN=true" >> $GITHUB_OUTPUT
           else
             echo "SHOULD_RUN=true" >> $GITHUB_OUTPUT
           fi
@@ -72,24 +68,6 @@ jobs:
 
       - name: Print shouldRun
         run: echo "SHOULD_RUN = ${{ needs.check-commit-count.outputs.has_commits }}"
-
-      # - name: Calculate Branch (workflow_run event)
-      #   if: github.event_name == 'workflow_run'
-      #   run: |
-      #     echo "REF=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_ENV
-      #     echo "BRANCH=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-
-      # - name: Calculate Branch (workflow_dispatch event)
-      #   if: github.event_name == 'workflow_dispatch'
-      #   run: |
-      #     echo "REF=${{ github.sha }}" >> $GITHUB_ENV
-      #     echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
-
-      # - name: Calculate Branch (schedule event)
-      #   if: github.event_name == 'schedule'
-      #   run: |
-      #     echo "REF=${{ github.sha }}" >> $GITHUB_ENV
-      #     echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Print vars
         run: |
