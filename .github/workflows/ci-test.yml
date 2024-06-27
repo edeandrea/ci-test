@@ -48,7 +48,6 @@ jobs:
 
       - name: Check whether workflow should run
         id: calculate_commits
-        continue-on-error: true
         run: |
           if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
             echo "SHOULD_RUN=true" >> $GITHUB_OUTPUT
@@ -58,7 +57,7 @@ jobs:
 
   build-jvm-image:
     needs: check-commit-count
-    if: (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
+    if: needs.check-commit-count.outputs.has_commits && (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
     runs-on: ubuntu-latest
     steps:
       - name: Print Github context
@@ -75,6 +74,8 @@ jobs:
           echo "github.repository = ${{ github.repository }}"
           echo "REF = ${{ env.REF }}"
           echo "BRANCH = ${{ env.BRANCH }}"
+
+      - uses: actions/checkout@v4
 
       - name: Print filesystem
         run: tree .
