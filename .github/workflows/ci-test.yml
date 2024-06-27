@@ -46,7 +46,7 @@ jobs:
           echo "github.repository = ${{ github.repository }}"
 
       - name: Print branch vars
-        if: (github.repository == 'edeandrea/ci-test') && ((github.event_name == 'workflow_dispatch') || (github.event_name == 'schedule') || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
+        if: (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
         run: |
           echo "REF = ${{ env.REF }}"
           echo "BRANCH = ${{ env.BRANCH }}"
