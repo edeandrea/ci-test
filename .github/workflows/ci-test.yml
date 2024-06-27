@@ -34,6 +34,12 @@ jobs:
           echo "REF=${{ github.sha }}" >> $GITHUB_ENV
           echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
+      - name: Calculate Branch (schedule event)
+        if: github.event_name == 'schedule'
+        run: |
+          echo "REF=${{ github.sha }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+
       - name: Print branch vars
         run: |
           echo "REF = ${{ env.REF }}"
