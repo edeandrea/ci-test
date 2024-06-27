@@ -57,7 +57,7 @@ jobs:
 
   build-jvm-image:
     needs: check-commit-count
-    if: needs.check-commit-count.outputs.has_commits && (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
+    if: (needs.check-commit-count.outputs.has_commits == 'true') && (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
     runs-on: ubuntu-latest
     steps:
       - name: Print Github context
