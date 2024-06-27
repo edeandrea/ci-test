@@ -49,7 +49,7 @@ jobs:
       - name: Check whether workflow should run
         id: calculate_commits
         run: |
-          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '24 hours ago' | wc -l) -gt 0 ]]; then
+          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '5 minutes ago' | wc -l) -gt 0 ]]; then
             echo "has_commits=true" >> $GITHUB_OUTPUT
           else
             echo "has_commits=true" >> $GITHUB_OUTPUT
