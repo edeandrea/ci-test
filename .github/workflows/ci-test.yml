@@ -1,0 +1,40 @@
+name: CI schedule test
+
+on:
+  workflow_dispatch:
+  schedule:
+    # - cron: "0 0 * * MON-FRI"
+    - cron: "* * * * *"
+
+concurrency:
+  group: "workflow = ${{ github.workflow }}, ref = ${{ github.event.workflow_run.head_branch || github.event.ref || github.ref }}"
+  cancel-in-progress: false
+
+jobs:
+  build-jvm-image:
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Github context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github)}}
+        run: echo $GITHUB_CONTEXT
+
+      - name: Calculate Branch (workflow_run event)
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "REF=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+
+      - name: Calculate Branch (workflow_dispatch event)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "REF=${{ github.sha }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Print branch vars
+        run: |
+          echo "REF = ${{ env.REF }}"
+          echo "BRANCH = ${{ env.BRANCH }}"
