@@ -48,11 +48,20 @@ jobs:
           fetch-depth: 0
           ref: ${{ needs.calculate-refs.outputs.branch }}
 
+      - name: Print commits
+        run: |
+          git log --oneline --since '5 minutes ago'
+          echo "Num commits = $(git log --oneline --since '5 minutes ago' | wc -l)"
+
       - name: Check whether workflow should run
         id: calculate_commits
         run: |
-          if [[ ${{ github.event_name }} == 'schedule' && $(git log --oneline --since '10 minutes ago' | wc -l) -gt 0 ]]; then
-            echo "has_commits=true" >> $GITHUB_OUTPUT
+          if [[ ${{ github.event_name }} == 'schedule' ]]; then
+            if [[ $(git log --oneline --since '5 minutes ago' | wc -l) -gt 0 ]]; then
+              echo "has_commits=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_commits=false" >> $GITHUB_OUTPUT
+            fi
           else
             echo "has_commits=true" >> $GITHUB_OUTPUT
           fi
