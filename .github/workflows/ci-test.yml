@@ -40,6 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has_commits: ${{ steps.calculate_commits.outputs.has_commits}}
+      ref: ${{ needs.calculate-refs.outputs.ref}}
+      branch: ${{ needs.calculate-refs.outputs.branch}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,6 +78,8 @@ jobs:
           echo "BRANCH = ${{ env.BRANCH }}"
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-commit-count.outputs.ref }}
 
       - name: Print filesystem
         run: tree .
