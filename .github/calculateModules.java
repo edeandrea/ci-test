@@ -48,7 +48,6 @@ class calculateModules {
   }
 
   private static String createJson(Set<String> changedModules) {
-    // return "{project: [%s]}".formatted(
     return "[%s]".formatted(
         changedModules.stream()
             .flatMap(calculateModules::convertModuleToJson)
