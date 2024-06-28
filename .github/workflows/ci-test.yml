@@ -90,13 +90,13 @@ jobs:
           java-version: 21
           distribution: temurin
 
-      - name: Install JBang
-        run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+      # - name: Install JBang
+      #   run: curl -Ls https://sh.jbang.dev | bash -s - app setup
 
       - name: Calculate projects
         id: calculate_projects
         run: |
-          json=$(jbang .github/calculateModules.java)
+          json=$(curl -Ls https://sh.jbang.dev | bash -s - .github/calculateModules.java)
           echo "${json}"
           echo "${json}" >> $GITHUB_OUTPUT
 
