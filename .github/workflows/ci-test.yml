@@ -1,10 +1,13 @@
 name: CI schedule test
 
+env:
+  TIMEFRAME: "24 hours"
+
 on:
   workflow_dispatch:
-  # schedule:
-  #   # - cron: "0 0 * * MON-FRI"
-  #   - cron: "* * * * *"
+  schedule:
+  #   # - cron: "0 0 * * *"
+    - cron: "* * * * *"
 
 concurrency:
   group: "workflow = ${{ github.workflow }}, ref = ${{ github.event.workflow_run.head_branch || github.event.ref || github.ref }}"
@@ -35,6 +38,34 @@ jobs:
             echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
+  calculate-modules:
+    needs: calculate-refs
+    runs-on: ubuntu-latest
+    outputs:
+      projects_matrix: ${{ steps.calculate_projects.outputs.projects_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.calculate-refs.outputs.branch }}
+          
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Install JBang
+        run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+
+      - name: Calculate projects
+        id: calculate_projects
+        run: |
+          json=$(jbang .github/calculateModules.java)
+          echo "${json}"
+          echo "${json}" >> $GITHUB_OUTPUT
+
   check-commit-count:
     needs: calculate-refs
     runs-on: ubuntu-latest
@@ -50,14 +81,14 @@ jobs:
 
       - name: Print commits
         run: |
-          git log --oneline --since '5 minutes ago'
-          echo "Num commits = $(git log --oneline --since '5 minutes ago' | wc -l)"
+          git log --oneline --since '${{ env.TIMEFRAME }} ago'
+          echo "Num commits = $(git log --oneline --since '${{ env.TIMEFRAME }} ago' | wc -l)"
 
       - name: Check whether workflow should run
         id: calculate_commits
         run: |
           if [[ ${{ github.event_name }} == 'schedule' ]]; then
-            if [[ $(git log --oneline --since '5 minutes ago' | wc -l) -gt 0 ]]; then
+            if [[ $(git log --oneline --since '${{ env.TIMEFRAME }} ago' | wc -l) -gt 0 ]]; then
               echo "has_commits=true" >> $GITHUB_OUTPUT
             else
               echo "has_commits=false" >> $GITHUB_OUTPUT
@@ -70,10 +101,28 @@ jobs:
         run: echo "has_commits = ${{ steps.calculate_commits.outputs.has_commits }}"
 
   build-jvm-image:
-    needs: check-commit-count
+    needs: 
+      - check-commit-count
+      - calculate-modules
     if: (needs.check-commit-count.outputs.has_commits == 'true') && (github.repository == 'edeandrea/ci-test') && (contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || ((github.event_name == 'worflow_run') && ((github.event.workflow_run.event == 'push') || (github.event.workflow_run.event == 'workflow_dispatch') && (github.event.workflow_run.conclusion == 'success') && (github.event.workflow_run.head_branch == 'main'))))
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: 
+        java:
+          - '17'
+        arch:
+          - amd64
+          - arm64
+        project: ${{ fromJson(needs.calculate-modules.outputs.projects_matrix) }}
     steps:
+      - name: Print matrix vars (${{ matrix.arch }}-${{ matrix.project.name }}-java${{ matrix.java }}-${{ matrix.project.openai-type }})"
+        run: |
+          echo "matrix.java = ${{ matrix.java }}"
+          echo "matrix.arch = ${{ matrix.arch }}"
+          echo "matrix.project.name = ${{ matrix.project.name }}"
+          echo "matrix.project.openai-type = ${{ matrix.project.openai-type }}"
+      
       - name: Print Github context
         env:
           GITHUB_CONTEXT: ${{ toJson(github)}}
