@@ -48,18 +48,20 @@ class calculateModules {
   }
 
   private static String createJson(Set<String> changedModules) {
-    return "{project: [%s]}".formatted(
+    // return "{project: [%s]}".formatted(
+    return "[%s]".formatted(
         changedModules.stream()
             .flatMap(calculateModules::convertModuleToJson)
-            .collect(Collectors.joining(",")));
+            .collect(Collectors.joining(","))
+      );
   }
 
   private static Stream<String> convertModuleToJson(String moduleName) {
-    var moduleJson = "{ name: \"%s\" }".formatted(moduleName);
+    var moduleJson = "{ \"name\": \"%s\" }".formatted(moduleName);
 
     return "rest-narration".equals(moduleName) ? Stream.of(
         moduleJson,
-        "{ name: \"%s\", openai-type: \"azure-openai\" }".formatted(moduleName)) : Stream.of(moduleJson);
+        "{ \"name\": \"%s\", \"openai-type\": \"azure-openai\" }".formatted(moduleName)) : Stream.of(moduleJson);
   }
 
   public static void main(String... args) throws IOException, InterruptedException {
