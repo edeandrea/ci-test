@@ -89,7 +89,6 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: maven
 
       - name: Install JBang
         run: curl -Ls https://sh.jbang.dev | bash -s - app setup
