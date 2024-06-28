@@ -98,7 +98,7 @@ jobs:
         run: |
           json=$(curl -Ls https://sh.jbang.dev | bash -s - .github/calculateModules.java)
           echo "${json}"
-          echo "${json}" >> $GITHUB_OUTPUT
+          echo "projects_matrix=${json}" >> $GITHUB_OUTPUT
 
   build-jvm-image:
     needs: 
