@@ -38,34 +38,6 @@ jobs:
             echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
-  calculate-modules:
-    needs: calculate-refs
-    runs-on: ubuntu-latest
-    outputs:
-      projects_matrix: ${{ steps.calculate_projects.outputs.projects_matrix }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.calculate-refs.outputs.branch }}
-          
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-          cache: maven
-
-      - name: Install JBang
-        run: curl -Ls https://sh.jbang.dev | bash -s - app setup
-
-      - name: Calculate projects
-        id: calculate_projects
-        run: |
-          json=$(jbang .github/calculateModules.java)
-          echo "${json}"
-          echo "${json}" >> $GITHUB_OUTPUT
-
   check-commit-count:
     needs: calculate-refs
     runs-on: ubuntu-latest
@@ -99,6 +71,35 @@ jobs:
 
       - name: Print has_commits
         run: echo "has_commits = ${{ steps.calculate_commits.outputs.has_commits }}"
+
+  calculate-modules:
+    needs: check-commit-count
+    runs-on: ubuntu-latest
+    if: needs.check-commit-count.outputs.has_commits == 'true'
+    outputs:
+      projects_matrix: ${{ steps.calculate_projects.outputs.projects_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.calculate-refs.outputs.branch }}
+          
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Install JBang
+        run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+
+      - name: Calculate projects
+        id: calculate_projects
+        run: |
+          json=$(jbang .github/calculateModules.java)
+          echo "${json}"
+          echo "${json}" >> $GITHUB_OUTPUT
 
   build-jvm-image:
     needs: 
